@@ -1,7 +1,8 @@
 import Vue from 'vue';
+import Notice from '@/components/dialog/Notice';
 
 function create(Component, props) {
-    // 使用extend构建实例
+    // 1.使用extend构建实例
     let Ctr = Vue.extend(Component);
     let comp =  new Ctr({propsData: props}).$mount();
     document.body.appendChild(comp.$el);
@@ -11,7 +12,7 @@ function create(Component, props) {
     }
     return comp;
 
-    // 使用render构建实例
+    // 2.使用render构建实例
     // let vm = new Vue({
     //     render: h => h(Component, { props })
     // }).$mount();
@@ -28,4 +29,11 @@ function create(Component, props) {
     // return comp;
 }
 
-export default create;
+// 1. 直接导出在main.js中挂载到Vue.prototype上成为公共方法
+// export default create;
+// 2. 改造成插件, 在main.js中Vue.use()引入成为插件
+export default {
+    install(Vue) {
+        Vue.prototype.$notice = props => create(Notice, props);
+    }
+};

@@ -8,11 +8,12 @@
 
 <script>
     import Schema from 'async-validator';
-    import Emmit from '@/utils/mixin/emmit';
+    import Emitter from '@/utils/mixin/emitter';
     export default {
         name: 'KFormItem',
+        componentName: 'KFormItem',
         inject: ['form'],
-        mixins: [Emmit],
+        mixins: [Emitter],
         props: {
             label: {
                 type: String,
@@ -34,7 +35,7 @@
                 this.validate();
             })
 
-            this.dispath('KForm', 'form-item-validate', this);
+            this.dispatch('KForm', 'form-item-validate', this);
         },
         methods: {
             validate() {

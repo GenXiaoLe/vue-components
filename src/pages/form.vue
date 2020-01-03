@@ -43,7 +43,7 @@ export default {
             message = '校验未通过';
         }
 
-        const notice = this.$create(this.$native, {
+        const notice = this.$notice({
             title: '自定义弹窗',
             message,
             duration: 1000

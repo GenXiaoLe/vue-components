@@ -7,6 +7,7 @@
 <script>
     export default {
         name: 'KForm',
+        componentName: 'KForm',
         provide() {
             return {
                 form: this

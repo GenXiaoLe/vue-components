@@ -10,18 +10,19 @@ const boardcast = function (componentName, eventName, params) {
     });
 }
 
+// dispatch 与 boardcast 在vue1.x中已经实现了, 但是在vue2.x中被废弃掉, element-ui用到这个方法, 于是又实现了一遍
 export default {
     methods: {
         // 向上寻找父级元素
-        dispath(componentName, eventName, params) {
+        dispatch(componentName, eventName, params) {
             let parent = this.$parent || this.$root;
-            let name = parent.$options._componentTag;
+            let name = parent.$options.componentName;
 
             while (parent && (!name || name !== componentName)) {
                 parent = parent.$parent;
 
                 if (parent) {
-                    name = parent.$options._componentTag;
+                    name = parent.$options.componentName;
                 }
             }
 

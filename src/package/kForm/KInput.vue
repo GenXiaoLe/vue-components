@@ -3,9 +3,9 @@
 </template>
 
 <script>
-    import Emmit from '@/utils/mixin/emmit';
+    import Emitter from '@/utils/mixin/emitter';
     export default {
-        mixins: [Emmit],
+        mixins: [Emitter],
         props: {
             value: {
                 type: String,
@@ -19,7 +19,7 @@
         methods: {
             onInput(e) {
                 this.$emit('input', e.target.value);
-                this.dispath('KFormItem', 'input-validate');
+                this.dispatch('KFormItem', 'input-validate');
             }
         }
     }
