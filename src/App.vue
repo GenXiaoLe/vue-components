@@ -1,16 +1,17 @@
 <template>
   <div id="app">
-    <Form />
+    <div>
+      <router-link to="/">首页</router-link>
+      <span>|</span>
+      <router-link to="/about">about</router-link>
+    </div>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import Form from './pages/form';
 export default {
   name: 'app',
-  components: {
-    Form
-  },
   data() {
     return {
       //
