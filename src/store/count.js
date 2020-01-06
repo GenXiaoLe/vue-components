@@ -13,5 +13,8 @@ export default {
                 commit('ADD');
             }, 1000);
         }
+    },
+    getters: {
+        dobuleCounter: state => state.counter * 2
     }
 }

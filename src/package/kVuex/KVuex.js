@@ -16,6 +16,8 @@ class Store {
                 $$state: options.state
             },
         })
+        // 创建一个响应式监听getter的实例
+        this._vmWatch = new Vue();
 
         // 为mutations 与 actions赋值
         store._mutations = options.mutations;
@@ -45,6 +47,10 @@ class Store {
 
     dispatch(_type, _payload) {
         this._actions[_type](this, _payload);
+    }
+
+    watch(getter, cb, options) {
+        return this._vmWatch.$watch(() => getter(this.state, this.getters), cb, options);
     }
 }
 
