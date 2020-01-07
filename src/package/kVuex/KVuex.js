@@ -1,13 +1,36 @@
 // 1.分两部分 一个是 构建Store的实例 一个是 构建install组件
 // 2.Store 要实现 commit dispatch state 并且把state编程响应式数据
 // 3.install 要实现挂载$Store到全局
+// 4.实现getter 利用Vue的计算属性
+
 
 let Vue;
 
 class Store {
     constructor(options = {}) {
-        const store = this;
         const { dispatch, commit } = this;
+
+        // 为mutations 与 actions赋值
+        this._mutations = options.mutations;
+        this._actions = options.actions;
+        this._wapperGetter = options.getters;
+
+        const store = this;
+        const computed = {};
+        this.getters = {};
+        Object.keys(this._wapperGetter).forEach(key => {
+            let fn = store._wapperGetter[key];
+            computed[key] = function() {
+                return fn(store.state);
+            };
+
+            Object.keys(this._wapperGetter).forEach(key => {
+                Object.defineProperty(store.getters, key, {
+                    get: () => store._vm[key]
+                });
+            });
+        });
+
         // 定义state
         // 将state编程响应式数据
         // 并加一层 使用 get 阻止state被修改 使用$$是因为不会被vue解析
@@ -15,18 +38,13 @@ class Store {
             data: {
                 $$state: options.state
             },
-        })
-        // 创建一个响应式监听getter的实例
-        this._vmWatch = new Vue();
-
-        // 为mutations 与 actions赋值
-        store._mutations = options.mutations;
-        store._actions = options.actions;
+            computed
+        });
         
-        store.commit = function(type, payload) {
+        this.commit = function(type, payload) {
             return commit.call(store, type, payload);
         }
-        store.dispatch = function(type, payload) {
+        this.dispatch = function(type, payload) {
             return dispatch.call(store, type, payload);
         }
     }
@@ -47,10 +65,6 @@ class Store {
 
     dispatch(_type, _payload) {
         this._actions[_type](this, _payload);
-    }
-
-    watch(getter, cb, options) {
-        return this._vmWatch.$watch(() => getter(this.state, this.getters), cb, options);
     }
 }
 

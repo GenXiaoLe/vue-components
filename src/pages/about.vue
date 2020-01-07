@@ -3,6 +3,7 @@
         this is about page
         <p @click="add">{{$Store.state.counter}}</p>
         <p @click="asyncAdd">{{$Store.state.counter}}</p>
+        <p>{{$Store.getters.dobuleCounter}}</p>
         <div>
         <router-link to="/about/detail1">page1</router-link>
         <span>|</span>
