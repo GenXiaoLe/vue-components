@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <p>{{content}}</p>
+        <p k-text="content"></p>
+        <p k-html="htmlContent"></p>
+    </div>
+</body>
+<script src="complier.js"></script>
+<script src="KVue.js"></script>
+<script>
+    var _vue = new KVue({
+        el: '#app',
+        data() {
+            return {
+                content: 10,
+                htmlContent: '<h3>h3</h3>'
+            }
+        }
+    });
+
+    setInterval(() => {
+        _vue.content++;
+    }, 1000)
+
+    // console.log(document.querySelector('#app').nodeName);
+    // console.log(document.querySelector('#app').nodeType);
+    // console.log(document.querySelector('#app').nodeValue);
+    // console.log(document.querySelector('#app').textContent);
+    // console.log(document.querySelector('#app').innerHTML);
+
+
+</script>
+</html>
