@@ -38,7 +38,7 @@ class Compliers {
     }
 
     renderText(el) {
-        this.updater(el, this.$vm, RegExp.$1, 'text');
+        this.updater(el, RegExp.$1, 'text');
     }
 
     renderElement(el) {
@@ -47,46 +47,76 @@ class Compliers {
             let _name = attr.name; // v-xx
             let _value = attr.value;
             let dir = _name.substring(2); // v-xx => xx 
-            this[dir + 'Complier'](el, this.$vm, _value);
+
+            let fn = this[dir + 'Complier'];
+            fn && fn.call(this, el, _value);
         })
     }
 
-    updater(el, vm, key, dict) {
-        this[dict + 'Updater'](el, vm, key);
-    }
-
-    textUpdater(el, vm, key) {
+    updater(el, key, dir) {
         // 数据初始化
-        el.textContent = vm[key];
+        let fn = this[dir + 'Updater'];
+        fn && fn.call(this, el, this.$vm[key]);
 
         // 监听数据
-        new Watcher(vm, key, function(newVal) {
-            el.textContent = newVal;
+        new Watcher(this.$vm, key, (newVal) => {
+            fn && fn.call(this, el, newVal);
         })
     }
 
-    textComplier(el, vm, key) {
-        this.updater(el, vm, key, 'text');
+    textUpdater(el, val) {
+        el.textContent = val;
     }
 
-    htmlComplier(el, vm, key) {
-        el.innerHTML = vm[key];
+    textComplier(el, key) {
+        this.updater(el, key, 'text');
+    }
+
+    htmlComplier(el, key) {
+        this.updater(el, key, 'html');
+    }
+
+    htmlUpdater(el, val) {
+        el.innerHTML = val;
     }
 }
 
-
-let watchers = []; // 用于存放Watcher的中间件
+// 用于监听值变化 调用更新方法
 class Watcher {
     constructor(vm, key, fn) {
         this.$vm = vm;
         this.$key = key;
         this.$fn = fn; // fn 为传入回调 用于出发update 接受参数为 val
 
-        watchers.push(this);
+        // Dep.target就相当于一个全局变量的中间件 用来储存每一个this
+        Dep.target = this;
+        vm[key]; // 调用某个key的get 把watcher push进去做到key与watcher一一对应
+        Dep.target = null;
     }
 
+    // 更新属性 这时候属性已经是响应过后的数据 直接操作即可
     update() {
         this.$fn.call(this.$vm, this.$vm[this.$key]);
+    }
+}
+
+// 用来储存watch和key对应的数组 相当于一个管家
+// eslint-disable-next-line no-unused-vars
+class Dep {
+    constructor() {
+        this.dep = []
+    }
+
+    addDep() {
+        this.dep.push(Dep.target);
+    }
+
+    noifty() {
+        this.dep.forEach(watcher => {
+            if (watcher) {
+                watcher.update();
+            }
+        })
     }
 }
 

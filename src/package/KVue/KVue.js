@@ -57,9 +57,14 @@ class Obsevers {
 
 
 const defineReactive = function(data, key, val) {
+
+    // eslint-disable-next-line no-undef
+    const dep = new Dep();
+
     Object.defineProperty(data, key, {
         get: () => {
             window.console.log('get:' + key + '&value:' + val);
+            dep.addDep();
             return val;
         },
         set: (newVal) => {
@@ -68,9 +73,7 @@ const defineReactive = function(data, key, val) {
                 val = newVal;
 
                 // eslint-disable-next-line no-undef
-                watchers.forEach(watcher => {
-                    watcher.update();
-                })
+                dep.noifty();
             }
         }
     })
