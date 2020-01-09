@@ -8,9 +8,10 @@
 </head>
 <body>
     <div id="app">
-        <p>{{content}}</p>
+        <p @click="addClick">{{content}}</p>
         <p k-text="content"></p>
         <p k-html="htmlContent"></p>
+        <input k-model="htmlContent" type="text">
     </div>
 </body>
 <script src="complier.js"></script>
@@ -23,12 +24,17 @@
                 content: 10,
                 htmlContent: '<h3>h3</h3>'
             }
+        },
+        methods: {
+            addClick() {
+                this.content++;
+            }
         }
     });
 
-    setInterval(() => {
-        _vue.content++;
-    }, 1000)
+    // setInterval(() => {
+    //     _vue.content++;
+    // }, 1000)
 
     // console.log(document.querySelector('#app').nodeName);
     // console.log(document.querySelector('#app').nodeType);

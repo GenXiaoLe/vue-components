@@ -3,6 +3,8 @@
 // 3. 写一个插值方法 用于编译插值
 // 4. 写一个元素相关指令的方法 用于编译特定指令 如 k-text k-html
 
+// v-model v-on
+
 class Compliers {
     constructor(el, vm) {
         this.$el = document.querySelector(el);
@@ -44,13 +46,38 @@ class Compliers {
     renderElement(el) {
         let attrs = el.attributes;
         Array.from(attrs).forEach(attr => {
-            let _name = attr.name; // v-xx
-            let _value = attr.value;
-            let dir = _name.substring(2); // v-xx => xx 
+            let _name = attr.name; // v-xx || @xxx
+            let exp = attr.value;
+            let dir;
+
+            // 如果是指令
+            if (this.isDirective(_name)) {
+                dir = _name.substring(2); // k-xx => xx
+            }
+            
+            // 如果是事件
+            if (this.isEvent(_name)) {
+                dir = _name.substring(1); // @xx => xx 
+            }
 
             let fn = this[dir + 'Complier'];
-            fn && fn.call(this, el, _value);
+            fn && fn.call(this, el, exp, dir);
         })
+    }
+
+    isDirective(name) {
+        return name.indexOf('k-') === 0;
+    }
+
+    isEvent(name) {
+        return name.indexOf('@') === 0;
+    }
+
+    clickComplier(el, exp, dir) {
+        // methods: { addClick: function() {} }
+        if (this.$vm.$options.methods) {
+            el.addEventListener(dir, this.$vm.$options.methods[exp].bind(this.$vm));
+        }
     }
 
     updater(el, key, dir) {
@@ -72,12 +99,26 @@ class Compliers {
         this.updater(el, key, 'text');
     }
 
-    htmlComplier(el, key) {
-        this.updater(el, key, 'html');
+    htmlComplier(el, key, dir) {
+        this.updater(el, key, dir);
     }
 
     htmlUpdater(el, val) {
         el.innerHTML = val;
+    }
+
+    modelComplier(el, key, dir) {
+        // 先对节点进行赋值
+        this.updater(el, key, dir);
+
+        // 进行数据响应
+        el.addEventListener('input', e => {
+            this.$vm[key] = e.target.value;
+        })
+    }
+
+    modelUpdater(el, val) {
+        el.value = val;
     }
 }
 
