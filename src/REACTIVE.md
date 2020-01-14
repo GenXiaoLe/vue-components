@@ -94,3 +94,5 @@
     - 首先执行原方法 const result = arrayProto[method].apply(this, args)
     - 然后利用 __ob__ 发送 dep上的notify方法 通知数组更新
     - 返回result 返回数组方法 完成覆盖
+    
+ps: 后续这些功能会在代码中逐步补充
