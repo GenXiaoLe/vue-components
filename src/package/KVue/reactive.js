@@ -4,6 +4,29 @@ let obj = {
     arr: []
 };
 
+// 取出数组的原型方法
+const arrayPrototypr = Array.prototype;
+// copy一下
+const arrayMethods = Object.create(arrayPrototypr);
+const _pro = [
+    'push',
+    'pop',
+    'shift',
+    'unshift'
+];
+
+_pro.forEach((methods) => {
+    // 重写数组的几个方法
+    arrayMethods[methods] = function mutator() {
+        const result = arrayPrototypr[methods].apply(this, arguments);
+
+        // eslint-disable-next-line no-console
+        console.log('数组发生了改变 去做更新处理');
+
+        return result;
+    };
+})
+
 const defineReactive = function(data, key, val) {
 
     Object.defineProperty(data, key, {
@@ -26,46 +49,27 @@ const defineReactive = function(data, key, val) {
 }
 
 const observes = function(obj) {
-    if (Object.prototype.toString.call(obj) !== '[object Object]') {
-        return null;
-    }
+    if (typeof obj !== 'object' || obj === null) return;
 
-    Object.keys(obj).forEach(key => {
-        defineReactive(obj, key, obj[key]);
-    });
+    if (Array.isArray(obj)) {
+        // 覆盖原型，替换操作
+        obj.__proto__ = arrayMethods;
+
+        let keys = Object.keys(obj);
+
+        for (let i = 0; i < keys.length; i++) {
+            observes(obj[i]);
+        }
+    } else {
+        Object.keys(obj).forEach(key => {
+            defineReactive(obj, key, obj[key]);
+        });
+    }
 }
 
 const set = function(data, key, val) {
     defineReactive(data, key, val);
 }
-
-const dep = function(_arrayMethods, _methods, callback) {
-    Object.defineProperty(_arrayMethods, _methods, {
-        enumerable: true,
-        configurable: true,
-        value: function(...args) {
-            callback(args);
-        } 
-    })
-}
-
-const arrayPrototypr = Array.prototype;
-const arrayMethods = Object.create(arrayPrototypr);
-const _pro = [
-    'push',
-    'pop',
-    'shift',
-    'unshift'
-]
-
-_pro.forEach((methods) => {
-    let original = arrayMethods[methods];
-
-    dep(arrayMethods, methods, function m(...args) {
-        const result = original.apply(this, args);
-        return result;
-    })
-})
 
 
 observes(obj);
