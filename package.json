@@ -10,7 +10,9 @@
   "dependencies": {
     "async-validator": "^3.2.3",
     "core-js": "^3.4.4",
-    "vue": "^2.6.10"
+    "express": "^4.17.1",
+    "vue": "^2.6.11",
+    "vue-server-renderer": "^2.6.11"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.0",
