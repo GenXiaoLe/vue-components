@@ -3,6 +3,7 @@
 // 3.install 要实现挂载$Store到全局
 // 4.实现getter 利用Vue的计算属性
 
+import KModuleCllection from './KModuleCllection';
 
 let Vue;
 
@@ -11,12 +12,14 @@ class Store {
         const { dispatch, commit } = this;
 
         // 为mutations 与 actions赋值
-        this._mutations = options.mutations;
-        this._actions = options.actions;
+        this._mutations = options.mutations || {};
+        this._actions = options.actions || {};
         this._wapperGetter = options.getters;
+        this._modules = new KModuleCllection(options);
 
         const store = this;
         const computed = {};
+        // 实现getter
         this.getters = {};
         Object.keys(this._wapperGetter).forEach(key => {
             let fn = store._wapperGetter[key];
@@ -31,12 +34,15 @@ class Store {
             });
         });
 
+        this.installModule(this, this._modules.root.state, this._modules.root);
+
         // 定义state
         // 将state编程响应式数据
         // 并加一层 使用 get 阻止state被修改 使用$$是因为不会被vue解析
+        const state = this._modules.root.state;
         this._vm = new Vue({
             data: {
-                $$state: options.state
+                $$state: state
             },
             computed
         });
@@ -47,6 +53,8 @@ class Store {
         this.dispatch = function(type, payload) {
             return dispatch.call(store, type, payload);
         }
+
+        window.console.log(this);
     }
 
     get state() {
@@ -57,7 +65,6 @@ class Store {
         window.console.error('不要直接修改state');
     }
      
-
     // _type 表示类型 _payload 载荷 用来表示参数
     commit(_type, _payload) {
         this._mutations[_type](this.state, _payload);
@@ -65,6 +72,25 @@ class Store {
 
     dispatch(_type, _payload) {
         this._actions[_type](this, _payload);
+    }
+
+    // 创建module 把module实例上的方法全挂载到store上
+    installModule(store, state, module) {
+        Object.assign(store._modules.root.state, state);
+
+        // 循环每个节点上的mutations
+        module.forEachMutations((key, mutations) => {
+            store._mutations[key] = mutations;
+        })
+
+        // 循环每个节点上的actions
+        module.forEachActions((key, actions) => {
+            store._actions[key] = actions;
+        })
+
+        module.forEachChild((key, children) => {
+            this.installModule(store, children.state, children) 
+        })
     }
 }
 
