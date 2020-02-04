@@ -21,6 +21,9 @@
                 this.$emit('input', e.target.value);
                 this.dispatch('KFormItem', 'input-validate');
             }
+        },
+        mounted() {
+            window.console.log(this.$attrs)
         }
     }
 </script>

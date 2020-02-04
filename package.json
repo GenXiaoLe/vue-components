@@ -11,8 +11,11 @@
     "async-validator": "^3.2.3",
     "core-js": "^3.4.4",
     "express": "^4.17.1",
+    "serve-favicon": "^2.5.0",
     "vue": "^2.6.11",
-    "vue-server-renderer": "^2.6.11"
+    "vue-router": "^3.1.5",
+    "vue-server-renderer": "^2.6.11",
+    "vue-template-compiler": "^2.6.11"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.0",
@@ -20,8 +23,7 @@
     "@vue/cli-service": "^4.1.0",
     "babel-eslint": "^10.0.3",
     "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "eslint-plugin-vue": "^5.0.0"
   },
   "eslintConfig": {
     "root": true,

@@ -7,21 +7,42 @@
 // 2. 调用createRenderer方法返回创建实例
 // 3. renderToString 传入 vue实例 由于返回是个promise 直接调用then 接受数据 输出
 
+// 引入favicon 使用server.use处理favicon地址
+
+// 引入fs，根据地址栏名称动态添加模版
+
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const renderer = require('vue-server-renderer');
 const Vue = require('vue');
 
 const server = express();
 const renderTo = renderer.createRenderer();
 
-const app = new Vue({
-    template: '<i>hello world</i>'
-})
+// 处理favicon
+const favicon = require('serve-favicon');
+server.use(favicon(path.join(__dirname, '../../../public', 'favicon.ico')));
 
-server.get('/', (req, res) => {
+server.get('*', (req, res) => {
+    // eslint-disable-next-line no-console
+    console.log(req.url)
+
+    const pageName = req.url.substring(1) || 'index';
+    const page = fs.readFileSync(`${pageName}.html`);
+
+    const app = new Vue({
+        template: page.toString(),
+        data: {
+            foo: 'vue ssr'
+        },
+    });
+
     renderTo.renderToString(app)
         .then(html => {
             res.send(html);
+
+            app.$mount('#app', true);
         })
         .catch(error => {
             // eslint-disable-next-line no-console
