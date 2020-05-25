@@ -2,7 +2,7 @@
 // 2.Store 要实现 commit dispatch state 并且把state编程响应式数据
 // 3.install 要实现挂载$Store到全局
 // 4.实现getter 利用Vue的计算属性
-
+// 5.解决modules的使用 本质上是在原先store的类上做一下改造 创建一个全新的module类将所有的方法全部挂载到原先定义的_mutations和_actions上 不管是直接传入options 还是options里面使用modules 都挂载到sotre上
 import KModuleCllection from './KModuleCllection';
 
 let Vue;
@@ -15,6 +15,7 @@ class Store {
         this._mutations = options.mutations || {};
         this._actions = options.actions || {};
         this._wapperGetter = options.getters;
+        // 初始化options中的modules 创建一个全新的_modules类
         this._modules = new KModuleCllection(options);
 
         const store = this;
@@ -74,8 +75,10 @@ class Store {
         this._actions[_type](this, _payload);
     }
 
-    // 创建module 把module实例上的方法全挂载到store上
+    // 创建module 把所有module实例上的方法全挂载到store上
+    // 接收当前的store实例 构建好的module实例中root根的state module实例中root
     installModule(store, state, module) {
+        // 首先进行一下合并 将每个module的state和root上的state合并
         Object.assign(store._modules.root.state, state);
 
         // 循环每个节点上的mutations
@@ -88,6 +91,7 @@ class Store {
             store._actions[key] = actions;
         })
 
+        // 如果有子modules 则统统循环遍历初始化挂载
         module.forEachChild((key, children) => {
             this.installModule(store, children.state, children) 
         })

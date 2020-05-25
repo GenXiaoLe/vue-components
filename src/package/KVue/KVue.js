@@ -29,6 +29,11 @@ class KVue {
     }
 
     proxy(vm) {
+        // data: {
+        //     a: '',
+        //     b: ''
+        // }
+
         Object.keys(vm.$data).forEach(key => {
             Object.defineProperty(vm, key, {
                 get: () => {
