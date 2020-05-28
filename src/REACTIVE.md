@@ -27,12 +27,12 @@
     - initData中 根据data类型解析data 将data进行代理proxy 最后开始observe
 2. 目录 vue/src/core/observer/index.js
     - observe在每个传入对象上进行判断它上面是否有__ob__ 如果有那么证明他就是已经Observer过得对象 可以直接返回 否则进行Observer
-    - Observer 对每个Observer实例创建一个__ob__ 该子ob保存的就是当前这个实例this 创建一个this.dep = new Dep() 判断类型 如果为数组类型 observeArray 否则 walk
+    - Observer 对每个Observer实例创建一个__ob__ 该子ob保存的就是当前这个Observer实例this 创建一个this.dep = new Dep() 判断类型 如果为数组类型 observeArray 否则 walk
         - walk 对每个属性进行 defineReactive响应式
         - observeArray 对里面每个内容重新进行observe 重复以上步骤
-    - defineReactive 首先创建一个 new Dep()为大管家 用来管理的watcher 2.0中他们的关系为1对1
+    - defineReactive 首先创建一个 new Dep()为大管家 用来管理的watcher 2.0中他们的关系为1对1 仅指和组件watcher 用户自定义watcher和dep是多对多的关系
         - 在正式进入响应式步骤之前会创建一个 childOb 如果当前对象的值 为object类型 则进行observe 主要为了应对需要进行$set之类的操作 以上的__ob__ this.dep均为这些操作提供帮助
-        - 收集依赖部分 defineReactive get Dep调用depend方法把当前watcher加入到dep中 同时childOb存在的话 childOb.dep 即this.dep 也要执行depend方法
+        - 收集依赖部分 defineReactive get Dep调用depend方法把当前watcher加入到dep中 同时childOb存在的话 childOb.dep 即this.dep 也要执行depend方法 这样每个子节点ob实例中的dep就包含了他的watcher，之后数组以及set都可以调用watcher通知更新
         - 通知部分 defineReactive set Dep调用notify 方法通知watcher进行更新 同时 如果set值也是对象 则对其进行observe
 3. 目录 vue/src/core/observer/dep.js
     - 新建一个Dep.target 用来存放当前watcher 相当于一个全局变量中间件 创建subs 用来写存放对应的watcher
@@ -47,12 +47,12 @@
 
 
 #### 异步批量更新
-1. watcher响应式数据时 调用queueWatcher
+1. watcher响应式数据时 调用watch中的update的queueWatcher
 2. queueWatcher 声明全局变量queue 用来存放相应watcher的dep 内部做去重 根据wathcer_id防止相同watcher入队 最后调用nextTick函数 引入并传入renderQueue方法
 3. nextTick 创建全局变量callbacks 并把传入的renderQueue push到callbacks里 然后调用timerFn
 4. 引入方法renderCallbacks timerFn内部返回一个函数 函数内部执行一个Promise.reslove().then(renderCallbacks) 将renderCallbacks压入微队列最后等待执行
 5. renderCallbacks方法遍历callbacks 执行callbacks内部的参数renderQueue方法
-6. renderQueue内部将全局变量queue拿出进行遍历 调用queue内部watcher的update方法 完成数据更新
+6. renderQueue内部将全局变量queue拿出进行遍历 调用queue内部watcher的run方法 完成数据更新
 7. 在微队列清空以后页面重新刷新 至此批量更新渲染完成
 
 
@@ -66,7 +66,7 @@
     1. 首先判断有没有oldVnode mount挂载时 界面中是没有vnode 直接调用createElm不走diff算法 这里可理解为初始化生成真实dom树 之后替换掉界面中存在的dom
     2. 再次渲染时首先判断oldVnode是否是真实dom 是的话将转化为虚拟dom 即vnode
     3. 如果oldVnode是虚拟dom 并且和newVnode key值等相同 即同一个vnode 则进入vnode patch比较 调用patchVnode
-5. patchVnode执行时正式进入新旧vnode对比模式 即diff 并且在diff前会先判断文本节点还是元素节点 文本节点直接diff 元素节点会找有没有子节点 有的话对比子节点
+5. patchVnode执行时正式进入新旧vnode对比模式 即diff 并且在diff前会先判断文本节点还是元素节点 文本节点直接diff 元素节点会找有没有子节点 有的话对比子节点 深度遍历 同级比较
     1. 如果新旧vnode均有子节点 则调用updateChildren() 进行对比计算
     2. 如果只有新vnode有子节点 则在旧vnode中追加
     3. 如果只有旧vnode有子节点 则直接干掉这些节点
